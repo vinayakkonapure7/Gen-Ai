@@ -1,0 +1,42 @@
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnableParallel
+from dotenv import load_dotenv
+
+load_dotenv()
+
+model=ChatOpenAI(model="gpt-4o-mini")
+
+parser=StrOutputParser()
+
+prompt1=PromptTemplate(
+    template="generate short and simple notes from the following text \n {text}",
+    input_variables=["text"]
+)
+
+prompt2=PromptTemplate(
+    template="generate 5 simple question and answers from the following \n {text}",
+    input_variables=["text"]
+)
+
+prompt3=PromptTemplate(
+    template="merge the following notes and quiz into a single documents  \n notes --> {notes} and quiz --> {quiz}",
+    input_variables=["notes","quiz"]
+    )
+
+parallel_chain=RunnableParallel({
+    "notes":prompt1 | model |parser,
+    "quiz": prompt2 | model | parser
+})
+
+merge_chain= prompt3 | model | parser
+
+chain=parallel_chain | merge_chain
+
+text="""Linear regression is a foundational supervised machine learning algorithm used to predict continuous quantitative targets. The core objective is to discover a linear relationship between input variables and an output variable. Simple linear regression models the relationship between exactly one feature and a single continuous target. Multiple linear regression expands this concept to model relationships using two or more independent feature inputs. The algorithm expresses this relationship mathematically through a linear equation defining a straight line or plane. This equation assigns a specific weight or coefficient to each individual input feature in the data. A bias term or intercept is added to represent the prediction when all input features equal zero. Weights dictate the slope and direction of the line while the bias shifts the line vertically. Machine learning models use training data to learn the optimal values for these weights and biases. The best-fit line is defined as the line that minimizes the overall distance to data points. Residuals represent the vertical distances between the actual data points and the model's predicted line. The most common metric used to evaluate these errors is the Mean Squared Error cost function. Mean Squared Error squares each individual residual to penalize larger prediction errors more heavily than small ones. Ordinary Least Squares is a mathematical method that calculates the optimal coefficients directly using linear algebra. Gradient Descent is an iterative optimization algorithm used to find the minimum of the cost function. This optimization process updates the weights in small steps determined by a specified learning rate parameter. If the learning rate is too large the algorithm might overshoot the optimal minimum value entirely. If the learning rate is too small the algorithm will take too long to converge. Linear regression assumes a strict linear relationship exists between the independent and dependent data variables. The algorithm assumes the residuals are independent and follow a normal distribution with constant variance. Multicollinearity occurs when independent features are highly correlated with each other causing unstable weight estimates. Outliers can severely distort the line of best fit because squared errors overemphasize extreme values. Overfitting happens when a model learns noise in the training data and fails on new data. Underfitting occurs when the model is too simple to capture the underlying trend of the data. Regularization techniques like Ridge regression add a penalty to prevent weights from growing too large. Lasso regression is another technique that can shrink less important feature weights down to exactly zero. Feature scaling helps gradient descent converge much faster by bringing all inputs to a similar scale. Evaluation metrics like R-squared measure the proportion of variance explained by the independent variables. Adjusted R-squared accounts for the number of predictors to prevent misleadingly high accuracy scores. This algorithm serves as a baseline model due to its high interpretability and computational efficiency. [1, 2, 3, 4, 5] 
+To help you continue with your study of linear regression, tell me:
+"""
+result=chain.invoke({"text":text})
+print(result)
+chain.get_graph().print_ascii()
