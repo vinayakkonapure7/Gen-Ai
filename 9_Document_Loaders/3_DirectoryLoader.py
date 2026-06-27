@@ -1,0 +1,19 @@
+from langchain_community.document_loaders import DirectoryLoader,PyPDFLoader
+
+loader=DirectoryLoader(
+    path="Books",
+    glob="*.pdf",
+    loader_cls=PyPDFLoader
+)
+
+docs=loader.load()
+
+method_2=list(loader.lazy_load())
+
+# print(len(docs))
+# print(docs[0].page_content)
+# print(docs[1].metadata)
+for doc in loader.lazy_load():
+    print(doc.metadata)
+    print(doc.page_content)
+    print("-" * 50)
