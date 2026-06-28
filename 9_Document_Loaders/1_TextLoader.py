@@ -18,7 +18,7 @@ model=ChatOpenAI()
 parser=StrOutputParser()
 
 prompt=PromptTemplate(
-    template="write summery of the follwing topic \n {topic}",
+    template="write summery of the following topic \n {topic}",
     input_variables=["topic"]
 )
 
